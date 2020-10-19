@@ -40,7 +40,7 @@
               </div>
             </div>
           </div>
-          <monitoror-welcome v-if="shouldShowWelcomePage"></monitoror-welcome>
+          <MonitororWelcome v-if="shouldShowWelcomePage"></MonitororWelcome>
           <monitoror-errors v-else class="c-app--loading-errors"></monitoror-errors>
         </div>
       </div>
@@ -49,7 +49,8 @@
 </template>
 
 <script lang="ts">
-  import {Component, Vue} from 'vue-property-decorator'
+  import {nextTick} from 'vue'
+  import {Options, Vue} from 'vue-class-component'
 
   import MonitororErrors from '@/components/Errors.vue'
   import MonitororTile from '@/components/Tile.vue'
@@ -58,7 +59,7 @@
   import ConfigError from '@/interfaces/configError'
   import TileConfig from '@/interfaces/tileConfig'
 
-  @Component({
+  @Options({
     components: {
       MonitororErrors,
       MonitororTile,
@@ -198,7 +199,7 @@
      */
 
     private async mounted() {
-      await Vue.nextTick()
+      await nextTick()
 
       window.addEventListener('online', this.dispatchUpdateNetworkState)
       window.addEventListener('offline', this.dispatchUpdateNetworkState)

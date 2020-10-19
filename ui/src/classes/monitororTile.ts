@@ -1,6 +1,5 @@
 import {addSeconds, differenceInSeconds, format, formatDistance} from 'date-fns'
-import Vue from 'vue'
-import {Prop} from 'vue-property-decorator'
+import {Options, Vue, prop} from 'vue-class-component'
 
 import TileStatus from '@/enums/tileStatus'
 import TileType from '@/enums/tileType'
@@ -10,13 +9,18 @@ import TileConfig from '@/interfaces/tileConfig'
 import TileMergeRequest from '@/interfaces/tileMergeRequest'
 import TileState from '@/interfaces/tileState'
 
-export default abstract class AbstractMonitororTile extends Vue {
-  /*
-   * Props
-   */
+/*
+ * Props
+ */
+class AbstractMonitororTileProps {
+  config: TileConfig = prop({
+    type: Object,
+    required: true,
+  })
+}
 
-  @Prop()
-  protected config!: TileConfig
+@Options({})
+export default class AbstractMonitororTile extends Vue.props(AbstractMonitororTileProps) {
 
   /*
    * Computed

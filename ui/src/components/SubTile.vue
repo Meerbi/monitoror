@@ -28,14 +28,14 @@
 </template>
 
 <script lang="ts">
-  import {Component} from 'vue-property-decorator'
+  import {Options} from 'vue-class-component'
 
   import TileStatus from '@/enums/tileStatus'
 
   import AbstractMonitororTile from '@/classes/monitororTile'
   import MonitororTileIcon from '@/components/TileIcon.vue'
 
-  @Component({
+  @Options({
     components: {
       MonitororTileIcon,
     },

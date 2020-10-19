@@ -121,12 +121,12 @@
 </template>
 
 <script lang="ts">
-  import {Component, Vue} from 'vue-property-decorator'
+  import {Options, Vue} from 'vue-class-component'
 
   import Route from '@/enums/route'
   import ConfigMetadata from '@/interfaces/configMetadata'
 
-  @Component({})
+  @Options({})
   export default class MonitororWelcome extends Vue {
     /*
      * Data

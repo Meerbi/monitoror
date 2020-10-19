@@ -1,8 +1,7 @@
 import axios from 'axios'
 import {now} from 'lodash-es'
-import {Md5 as md5} from 'ts-md5/dist/md5'
-import Vue from 'vue'
-import Vuex, {StoreOptions} from 'vuex'
+import {Md5 as md5} from 'ts-md5/src/md5'
+import {createStore, StoreOptions} from 'vuex'
 
 import DISPLAYABLE_SUBTILE_STATUS from '@/constants/displayableSubtileStatus'
 
@@ -24,8 +23,6 @@ import Info from '@/interfaces/info'
 import TaskOptions from '@/interfaces/taskOptions'
 import TileConfig from '@/interfaces/tileConfig'
 import TileState from '@/interfaces/tileState'
-
-Vue.use(Vuex)
 
 const API_BASE_PATH = '/api/v1'
 export const DEFAULT_CONFIG_NAME = 'default'
@@ -226,11 +223,7 @@ const store: StoreOptions<RootState> = {
       state.errors = payload
     },
     setTileState(state, payload: { tileStateKey: string, tileState: TileState }): void {
-      if (!state.tilesState.hasOwnProperty(payload.tileStateKey)) {
-        Vue.set(state.tilesState, payload.tileStateKey, payload.tileState)
-      } else {
-        state.tilesState[payload.tileStateKey] = payload.tileState
-      }
+      state.tilesState[payload.tileStateKey] = payload.tileState
     },
     setOnline(state, payload: boolean): void {
       state.online = payload
@@ -484,4 +477,4 @@ const store: StoreOptions<RootState> = {
   },
 }
 
-export default new Vuex.Store(store)
+export default createStore(store)

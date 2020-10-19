@@ -67,7 +67,7 @@
 </template>
 
 <script lang="ts">
-  import {Component} from 'vue-property-decorator'
+  import {Options} from 'vue-class-component'
 
   import DISPLAYABLE_SUBTILE_STATUS from '@/constants/displayableSubtileStatus'
   import TileStatus from '@/enums/tileStatus'
@@ -80,7 +80,7 @@
   import MonitororTileIcon from '@/components/TileIcon.vue'
   import TileValue from '@/interfaces/tileValue'
 
-  @Component({
+  @Options({
     components: {
       MonitororSubTile,
       MonitororTileIcon,
