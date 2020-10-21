@@ -6,4 +6,4 @@ import store from '@/store'
 // @ts-ignore
 const app = createApp(App)
 app.use(store)
-app.mount('#app')
+app.mount('#app-root')

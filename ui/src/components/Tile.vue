@@ -67,150 +67,231 @@
 </template>
 
 <script lang="ts">
-  import {Options} from 'vue-class-component'
+  import {defineComponent, computed} from 'vue'
+  import {useStore} from 'vuex'
 
   import DISPLAYABLE_SUBTILE_STATUS from '@/constants/displayableSubtileStatus'
+  import useMonitororTile from '@/composables/useMonitororTile'
   import TileStatus from '@/enums/tileStatus'
   import TileType from '@/enums/tileType'
   import TileValueUnit from '@/enums/tileValueUnit'
   import TileConfig from '@/interfaces/tileConfig'
 
-  import AbstractMonitororTile from '@/classes/monitororTile'
   import MonitororSubTile from '@/components/SubTile.vue'
   import MonitororTileIcon from '@/components/TileIcon.vue'
   import TileValue from '@/interfaces/tileValue'
 
-  @Options({
+  const MonitororTile = defineComponent({
     components: {
       MonitororSubTile,
       MonitororTileIcon,
     },
-  })
-  export default class MonitororTile extends AbstractMonitororTile {
-
-    /*
-     * Computed
-     */
-
-    get classes() {
-      return {
-        ['c-monitoror-tile__theme-' + this.theme]: true,
-        'c-monitoror-tile__empty': this.isEmpty,
-        'c-monitoror-tile__group': this.isGroup,
-        'c-monitoror-tile__status-succeeded': this.isSucceeded,
-        'c-monitoror-tile__status-failed': this.isFailed,
-        'c-monitoror-tile__status-warning': this.isWarning,
-        'c-monitoror-tile__status-running': this.isRunning,
-        'c-monitoror-tile__status-queued': this.isQueued,
-        'c-monitoror-tile__status-canceled': this.status === TileStatus.Canceled,
-        'c-monitoror-tile__status-action-required': this.status === TileStatus.ActionRequired,
+    props: {
+      config: {
+        type: Object as () => TileConfig,
+        required: true
       }
-    }
+    },
+    setup(props) {
+      const {
+        type,
+        stateKey,
+        theme,
+        now,
+        state,
+        mergeRequestLabelPrefix,
+        label,
+        build,
+        branch,
+        mergeRequest,
+        status,
+        previousStatus,
+        isQueued,
+        isRunning,
+        isSucceeded,
+        isFailed,
+        isWarning,
+        startedAt,
+        finishedAt,
+        duration,
+        estimatedDuration,
+        progress,
+        progressTime,
+        isOvertime,
+        progressBarStyle,
+        finishedSince,
+        author,
+        showAuthor,
+      } = useMonitororTile(props.config)
 
-    get styles() {
-      const styles = {
-        'grid-column': `auto / span ${this.columnSpan}`,
-        'grid-row': `auto / span ${this.rowSpan}`,
-        '--row-span': this.rowSpan,
-      }
+      const store = useStore()
 
-      return styles
-    }
-
-    get isEmpty(): boolean {
-      return this.type === TileType.Empty
-    }
-
-    get isGroup(): boolean {
-      return this.type === TileType.Group
-    }
-
-    get columnSpan(): number {
-      return this.config.columnSpan || 1
-    }
-
-    get rowSpan(): number {
-      return this.config.rowSpan || 1
-    }
-
-    get displayedSubTiles(): TileConfig[] | undefined {
-      if (!this.config.tiles) {
-        return
-      }
-
-      const displayedSubTiles = this.config.tiles.filter((subTile) => {
-        if (!this.$store.state.tilesState.hasOwnProperty(subTile.stateKey)) {
-          return false
+      const classes = computed(() => {
+        return {
+          ['c-monitoror-tile__theme-' + theme.value]: true,
+          'c-monitoror-tile__empty': isEmpty.value,
+          'c-monitoror-tile__group': isGroup.value,
+          'c-monitoror-tile__status-succeeded': isSucceeded.value,
+          'c-monitoror-tile__status-failed': isFailed.value,
+          'c-monitoror-tile__status-warning': isWarning.value,
+          'c-monitoror-tile__status-running': isRunning.value,
+          'c-monitoror-tile__status-queued': isQueued.value,
+          'c-monitoror-tile__status-canceled': status.value === TileStatus.Canceled,
+          'c-monitoror-tile__status-action-required': status.value === TileStatus.ActionRequired,
         }
-
-        return DISPLAYABLE_SUBTILE_STATUS.includes(this.$store.state.tilesState[subTile.stateKey].status)
       })
 
-      return displayedSubTiles
+      const styles = computed(() => {
+        const styles = {
+          'grid-column': `auto / span ${columnSpan.value}`,
+          'grid-row': `auto / span ${rowSpan.value}`,
+          '--row-span': rowSpan.value,
+        }
+
+        return styles
+      })
+
+      const isEmpty = computed((): boolean => {
+        return type.value === TileType.Empty
+      })
+
+      const isGroup = computed((): boolean => {
+        return type.value === TileType.Group
+      })
+
+      const columnSpan = computed((): number => {
+        return props.config.columnSpan || 1
+      })
+
+      const rowSpan = computed((): number => {
+        return props.config.rowSpan || 1
+      })
+
+      const displayedSubTiles = computed((): TileConfig[] | undefined => {
+        if (!props.config.tiles) {
+          return
+        }
+
+        const displayedSubTiles = props.config.tiles.filter((subTile) => {
+          if (!store.state.tilesState.hasOwnProperty(subTile.stateKey)) {
+            return false
+          }
+
+          return DISPLAYABLE_SUBTILE_STATUS.includes(store.state.tilesState[subTile.stateKey].status)
+        })
+
+        return displayedSubTiles
+      })
+
+      const value = computed((): TileValue | undefined => {
+        if (state.value === undefined) {
+          return
+        }
+
+        return state.value.value
+      })
+
+      const message = computed((): string | undefined => {
+        if (state.value === undefined) {
+          return
+        }
+
+        return state.value.message
+      })
+
+      const buildId = computed((): string | undefined => {
+        if (build.value === undefined) {
+          return
+        }
+
+        return build.value.id
+      })
+
+      const unit = computed((): TileValueUnit => {
+        if (value.value === undefined) {
+          return TileValueUnit.Raw
+        }
+
+        return value.value.unit as TileValueUnit
+      })
+
+      const values = computed((): string[] | undefined => {
+        if (value.value === undefined) {
+          return
+        }
+
+        return value.value.values
+      })
+
+      const displayedValue = computed((): string | undefined => {
+        if (values.value === undefined) {
+          return
+        }
+
+        const UNIT_DISPLAY = {
+          [TileValueUnit.Millisecond]: 'ms',
+          [TileValueUnit.Ratio]: '%',
+          [TileValueUnit.Number]: '',
+          [TileValueUnit.Raw]: '',
+        }
+
+        let value = values.value[values.value.length - 1]
+        if (unit.value === TileValueUnit.Millisecond) {
+          value = Math.round(parseFloat(value)).toString()
+        } else if (unit.value === TileValueUnit.Ratio) {
+          value = (parseFloat(value) * 100).toFixed(2).toString()
+        }
+
+        return value + UNIT_DISPLAY[unit.value]
+      })
+
+      return {
+        classes,
+        styles,
+        isEmpty,
+        isGroup,
+        columnSpan,
+        rowSpan,
+        displayedSubTiles,
+        value,
+        message,
+        buildId,
+        unit,
+        values,
+        displayedValue,
+        type,
+        stateKey,
+        theme,
+        now,
+        state,
+        mergeRequestLabelPrefix,
+        label,
+        build,
+        branch,
+        mergeRequest,
+        status,
+        previousStatus,
+        isQueued,
+        isRunning,
+        isSucceeded,
+        isFailed,
+        isWarning,
+        startedAt,
+        finishedAt,
+        duration,
+        estimatedDuration,
+        progress,
+        progressTime,
+        isOvertime,
+        progressBarStyle,
+        finishedSince,
+        author,
+        showAuthor,
+      }
     }
+  })
 
-    get value(): TileValue | undefined {
-      if (this.state === undefined) {
-        return
-      }
-
-      return this.state.value
-    }
-
-    get message(): string | undefined {
-      if (this.state === undefined) {
-        return
-      }
-
-      return this.state.message
-    }
-
-    get buildId(): string | undefined {
-      if (this.build === undefined) {
-        return
-      }
-
-      return this.build.id
-    }
-
-    get unit(): TileValueUnit {
-      if (this.value === undefined) {
-        return TileValueUnit.Raw
-      }
-
-      return this.value.unit as TileValueUnit
-    }
-
-    get values(): string[] | undefined {
-      if (this.value === undefined) {
-        return
-      }
-
-      return this.value.values
-    }
-
-    get displayedValue(): string | undefined {
-      if (this.values === undefined) {
-        return
-      }
-
-      const UNIT_DISPLAY = {
-        [TileValueUnit.Millisecond]: 'ms',
-        [TileValueUnit.Ratio]: '%',
-        [TileValueUnit.Number]: '',
-        [TileValueUnit.Raw]: '',
-      }
-
-      let value = this.values[this.values.length - 1]
-      if (this.unit === TileValueUnit.Millisecond) {
-        value = Math.round(parseFloat(value)).toString()
-      } else if (this.unit === TileValueUnit.Ratio) {
-        value = (parseFloat(value) * 100).toFixed(2).toString()
-      }
-
-      return value + UNIT_DISPLAY[this.unit]
-    }
-  }
+  export default MonitororTile
 </script>
 
 <style lang="scss">

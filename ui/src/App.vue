@@ -75,9 +75,9 @@
 
     private shouldShowCursor: boolean = true
     private shouldDisableTransitions: boolean = false
-    private shouldShowCursorTimeout!: number
-    private shouldDisableTransitionsTimeout!: number
-    private taskRunnerInterval!: number
+    private shouldShowCursorTimeout!: ReturnType<typeof setTimeout>
+    private shouldDisableTransitionsTimeout!: ReturnType<typeof setTimeout>
+    private taskRunnerInterval!: ReturnType<typeof setInterval>
     private isReady: boolean = false
 
     /*
@@ -198,7 +198,7 @@
      * Hooks
      */
 
-    private async mounted() {
+    async mounted() {
       await nextTick()
 
       window.addEventListener('online', this.dispatchUpdateNetworkState)
@@ -218,7 +218,7 @@
       })
     }
 
-    private beforeDestroy() {
+    beforeDestroy() {
       window.removeEventListener('online', this.dispatchUpdateNetworkState)
       window.removeEventListener('offline', this.dispatchUpdateNetworkState)
       window.removeEventListener('resize', this.onResize)

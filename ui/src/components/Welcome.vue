@@ -164,7 +164,7 @@
      * Methods
      */
 
-    private mounted() {
+    mounted() {
       this.$store.dispatch('fetchConfigList')
 
       setTimeout(() => {
